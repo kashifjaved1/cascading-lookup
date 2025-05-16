@@ -1,0 +1,55 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model IEnumerable<CascadingLookup.Data.Entities.Country>
+@{
+    ViewData["Title"] = "Location Lookup";
+}
+
+<h3>Select Location</h3>
+
+<select id="country" class="form-select">
+    <option value="">-- Select Country --</option>
+    @foreach (var c in Model)
+    {
+        <option value="@c.Id">@c.Name</option>
+    }
+</select>
+
+<select id="city" class="form-select mt-2" style="display:none;">
+    <option value="">-- Select City --</option>
+</select>
+
+<select id="area" class="form-select mt-2" style="display:none;">
+    <option value="">-- Select Area --</option>
+</select>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    $('#country').change(function () {
+        let countryId = $(this).val();
+        $('#city').hide().html('<option value="">-- Select City --</option>');
+        $('#area').hide().html('<option value="">-- Select Area --</option>');
+        if (countryId) {
+            $.get(`/api/lookupapi/cities/${countryId}`, function (data) {
+                $.each(data, function (i, city) {
+                    $('#city').append(`<option value="${city.id}">${city.name}</option>`);
+                });
+                $('#city').show();
+            });
+        }
+    });
+
+    $('#city').change(function () {
+        let cityId = $(this).val();
+        $('#area').hide().html('<option value="">-- Select Area --</option>');
+        if (cityId) {
+            $.get(`/api/lookupapi/areas/${cityId}`, function (data) {
+                $.each(data, function (i, area) {
+                    $('#area').append(`<option value="${area.id}">${area.name}</option>`);
+                });
+                $('#area').show();
+            });
+        }
+    });
+</script>
+}
